@@ -32,6 +32,10 @@ func usersGetAll(w http.ResponseWriter, r *http.Request) {
 		postError(w, http.StatusInternalServerError)
 		return
 	}
+	if r.Method == http.MethodHead {
+		postBodyResponse(w, http.StatusOK, jsonResponse{})
+		return 
+	}
 	postBodyResponse(w, http.StatusOK, jsonResponse{"users": users})
 }
 
@@ -105,7 +109,7 @@ func usersPutOne(w http.ResponseWriter, r *http.Request, id bson.ObjectId) {
 	postBodyResponse(w, http.StatusOK, jsonResponse{"user": u})
 }
 
-func usersGetOne(w http.ResponseWriter, _ *http.Request, id bson.ObjectId) {
+func usersGetOne(w http.ResponseWriter, r *http.Request, id bson.ObjectId) {
 	u, err := user.One(id)
 	if err != nil {
 		if err == storm.ErrNotFound {
@@ -114,6 +118,10 @@ func usersGetOne(w http.ResponseWriter, _ *http.Request, id bson.ObjectId) {
 		}
 		postError(w, http.StatusInternalServerError)
 		return
+	}
+	if r.Method == http.MethodHead {
+		postBodyResponse(w, http.StatusOK, jsonResponse{})
+		return 
 	}
 	postBodyResponse(w, http.StatusOK, jsonResponse{"user": u})
 }
