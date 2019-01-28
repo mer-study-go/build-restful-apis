@@ -59,6 +59,21 @@
 		},
 		{
 			"name": "Create user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8936eb33-1a4b-478d-84a2-3e856849f81e",
+						"exec": [
+							"let loc = pm.response.headers.get(\"location\")",
+							"let id = loc.substr(loc.lastIndexOf(\"/\"))",
+							"",
+							"pm.environment.set(\"lastUserID\", id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [
@@ -70,14 +85,13 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"name\": \"Mer\",\n\t\"role\": \"developer\"\n}"
+					"raw": "{\n\t\"name\": \"Mark\",\n\t\"role\": \"lead developer\"\n}"
 				},
 				"url": {
-					"raw": "localhost:8080/users/",
+					"raw": "{{host}}/users/",
 					"host": [
-						"localhost"
+						"{{host}}"
 					],
-					"port": "8080",
 					"path": [
 						"users",
 						""
@@ -103,6 +117,64 @@
 				},
 				"url": {
 					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get user with id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "localhost:8080/users/:id",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "5c4e7959b9ed7c13f46f10d9"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get user with id - invalid",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "localhost:8080/users/:id",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "anything"
+						}
+					]
 				}
 			},
 			"response": []

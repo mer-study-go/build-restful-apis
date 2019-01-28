@@ -285,6 +285,28 @@
     },
     {
       "type": "text",
+      "data": "<h3>Retrieving an Item (GET)</h3>"
+    },
+    {
+      "type": "text",
+      "data": "src/handlers/userHandlers.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "func usersGetOne(w http.ResponseWriter, _ *http.Request, id bson.ObjectId) {\n\tu, err := user.One(id)\n\tif err != nil {\n\t\tif err == storm.ErrNotFound {\n\t\t\tpostError(w, http.StatusNotFound)\n\t\t\treturn\n\t\t}\n\t\tpostError(w, http.StatusInternalServerError)\n\t\treturn\n\t}\n\tpostBodyResponse(w, http.StatusOK, jsonResponse{\"user\": u})\n}"
+    },
+    {
+      "type": "text",
+      "data": "src/handlers/usersRoute.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "// UsersRouter handles the users route\nfunc UsersRouter(w http.ResponseWriter, r *http.Request) {\n\tpath := strings.TrimSuffix(r.URL.Path, \"/\")\n\n\tif path == \"/users\" {\n\t\tswitch r.Method {\n\t\tcase http.MethodGet:\n\t\t\tusersGetAll(w, r)\n\t\t\treturn\n\t\tcase http.MethodPost:\n\t\t\tusersPostOne(w, r)\n\t\t\treturn\n\t\tdefault:\n\t\t\tpostError(w, http.StatusMethodNotAllowed)\n\t\t\treturn\n\t\t}\n\t}\n\n\tpath = strings.TrimPrefix(path, \"/users/\")\n\tif !bson.IsObjectIdHex(path) {\n\t\tpostError(w, http.StatusNotFound)\n\t\treturn\n\t}\n\n\tid := bson.ObjectIdHex(path)\n\n\tswitch r.Method {\n\tcase http.MethodGet:\n\t\tusersGetOne(w, r, id)\n\t\treturn\n\tcase http.MethodPut:\n\t\treturn\n\tcase http.MethodPatch:\n\t\treturn\n\tcase http.MethodDelete:\n\t\treturn\n\tdefault:\n\t\tpostError(w, http.StatusMethodNotAllowed)\n\t\treturn\n\t}\n}"
+    },
+    {
+      "type": "text",
       "data": ""
     },
     {
