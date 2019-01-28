@@ -15,7 +15,10 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": ""
+					"raw": "{{host}}",
+					"host": [
+						"{{host}}"
+					]
 				}
 			},
 			"response": []
@@ -30,7 +33,13 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": ""
+					"raw": "{{host}}/something",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"something"
+					]
 				}
 			},
 			"response": []
@@ -45,11 +54,31 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "localhost:8080/users",
+					"raw": "{{host}}/users",
 					"host": [
-						"localhost"
+						"{{host}}"
 					],
-					"port": "8080",
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OPTIONS user list",
+			"request": {
+				"method": "OPTIONS",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{host}}/users",
+					"host": [
+						"{{host}}"
+					],
 					"path": [
 						"users"
 					]
@@ -66,7 +95,7 @@
 						"id": "8936eb33-1a4b-478d-84a2-3e856849f81e",
 						"exec": [
 							"let loc = pm.response.headers.get(\"location\")",
-							"let id = loc.substr(loc.lastIndexOf(\"/\"))",
+							"let id = loc.substr(loc.lastIndexOf(\"/\")).substr(1)",
 							"",
 							"pm.environment.set(\"lastUserID\", id);"
 						],
@@ -116,13 +145,32 @@
 					"raw": "{\n\t\"role\": \"developer\"\n}"
 				},
 				"url": {
-					"raw": ""
+					"raw": "{{host}}/users/",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"users",
+						""
+					]
 				}
 			},
 			"response": []
 		},
 		{
 			"name": "Get user with id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "97a298c0-382a-4d49-b161-c0ff4c96a504",
+						"exec": [
+							"pm.environment.unset(\"lastUserID\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -131,11 +179,10 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "localhost:8080/users/:id",
+					"raw": "{{host}}/users/:id",
 					"host": [
-						"localhost"
+						"{{host}}"
 					],
-					"port": "8080",
 					"path": [
 						"users",
 						":id"
@@ -143,7 +190,47 @@
 					"variable": [
 						{
 							"key": "id",
-							"value": "5c4e7959b9ed7c13f46f10d9"
+							"value": "5c4e950cb9ed7c2c0417f399"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OPTIONS user with id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "97a298c0-382a-4d49-b161-c0ff4c96a504",
+						"exec": [
+							"pm.environment.unset(\"lastUserID\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "OPTIONS",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{host}}/users/:id",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"users",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "5c4e950cb9ed7c2c0417f399"
 						}
 					]
 				}
@@ -160,11 +247,10 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "localhost:8080/users/:id",
+					"raw": "{{host}}/users/:id",
 					"host": [
-						"localhost"
+						"{{host}}"
 					],
-					"port": "8080",
 					"path": [
 						"users",
 						":id"
@@ -173,6 +259,163 @@
 						{
 							"key": "id",
 							"value": "anything"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put (replace) user with id",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"Mike\",\n\t\"role\": \"team leader\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/users/:id",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"users",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{lastUserID}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PATCH (modify) user with id",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"role\": \"tester\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/users/:id",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"users",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{lastUserID}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE user with id",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{host}}/users/:id",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"users",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{lastUserID}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Head User list",
+			"request": {
+				"method": "HEAD",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{host}}/users",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Head User with id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "97a298c0-382a-4d49-b161-c0ff4c96a504",
+						"exec": [
+							"pm.environment.unset(\"lastUserID\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "HEAD",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{host}}/users/:id",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"users",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "5c4e7959b9ed7c13f46f10d9"
 						}
 					]
 				}

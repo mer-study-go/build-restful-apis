@@ -221,16 +221,7 @@
     {
       "type": "code",
       "language": "golang",
-      "data": "package handlers\n\nimport (\n\t\"net/http\"\n\n\t\"github.com/build-restful-apis/src/user\"\n)\n\nfunc usersGetAll(w http.ResponseWriter, r *http.Request) {\n\tusers, err := user.All()\n\tif err != nil {\n\t\tpostError(w, http.StatusInternalServerError)\n\t\treturn\n\t}\n\tpostBodyResponse(w, http.StatusOK, jsonResponse{\"users\": users})\n}"
-    },
-    {
-      "type": "text",
-      "data": "src/handlers/usersRouter.go"
-    },
-    {
-      "type": "code",
-      "language": "golang",
-      "data": "package handlers\n\nimport (\n\t\"net/http\"\n\t\"strings\"\n\n\t\"gopkg.in/mgo.v2/bson\"\n)\n\n// UsersRouter handles the users route\nfunc UsersRouter(w http.ResponseWriter, r *http.Request) {\n\tpath := strings.TrimSuffix(r.URL.Path, \"/\")\n\n\tif path == \"/users\" {\n\t\tswitch r.Method {\n\t\tcase http.MethodGet:\n\t\t\tusersGetAll(w, r)\n\t\t\treturn\n\t\tcase http.MethodPost:\n\t\t\treturn\n\t\tdefault:\n\t\t\tpostError(w, http.StatusMethodNotAllowed)\n\t\t\treturn\n\t\t}\n\t}\n\n\tpath = strings.TrimPrefix(path, \"/users/\")\n\tif !bson.IsObjectIdHex(path) {\n\t\tpostError(w, http.StatusNotFound)\n\t\treturn\n\t}\n\n\t// id := bson.ObjectIdHex(path)\n\n\tswitch r.Method {\n\tcase http.MethodGet:\n\t\treturn\n\tcase http.MethodPut:\n\t\treturn\n\tcase http.MethodPatch:\n\t\treturn\n\tcase http.MethodDelete:\n\t\treturn\n\tdefault:\n\t\tpostError(w, http.StatusMethodNotAllowed)\n\t\treturn\n\t}\n}"
+      "data": "func usersGetAll(w http.ResponseWriter, r *http.Request) {\n\tusers, err := user.All()\n\tif err != nil {\n\t\tpostError(w, http.StatusInternalServerError)\n\t\treturn\n\t}\n\tpostBodyResponse(w, http.StatusOK, jsonResponse{\"users\": users})\n}"
     },
     {
       "type": "text",
@@ -263,25 +254,7 @@
     {
       "type": "code",
       "language": "golang",
-      "data": "package handlers\n\nimport (\n\t\"encoding/json\"\n\t\"errors\"\n\t\"io/ioutil\"\n\t\"net/http\"\n\n\t\"gopkg.in/mgo.v2/bson\"\n\n\t\"github.com/build-restful-apis/src/user\"\n)\n\nfunc bodyToUser(r *http.Request, u *user.User) error {\n\tif r.Body == nil {\n\t\treturn errors.New(\"Request body is empty\")\n\t}\n\tif u == nil {\n\t\treturn errors.New(\"A user is required\")\n\t}\n\tbd, err := ioutil.ReadAll(r.Body)\n\tif err != nil {\n\t\treturn err\n\t}\n\treturn json.Unmarshal(bd, u)\n}\n\nfunc usersGetAll(w http.ResponseWriter, r *http.Request) {\n\tusers, err := user.All()\n\tif err != nil {\n\t\tpostError(w, http.StatusInternalServerError)\n\t\treturn\n\t}\n\tpostBodyResponse(w, http.StatusOK, jsonResponse{\"users\": users})\n}\n\nfunc usersPostOne(w http.ResponseWriter, r *http.Request) {\n\tu := new(user.User)\n\terr := bodyToUser(r, u)\n\tif err != nil {\n\t\tpostError(w, http.StatusBadRequest)\n\t\treturn\n\t}\n\tu.ID = bson.NewObjectId()\n\terr = u.Save()\n\tif err != nil {\n\t\tif err == user.ErrRecordInvalid {\n\t\t\tpostError(w, http.StatusBadRequest)\n\t\t} else {\n\t\t\tpostError(w, http.StatusInternalServerError)\n\t\t}\n\t\treturn\n\t}\n\tw.Header().Set(\"Location\", \"/users/\"+u.ID.Hex())\n\tw.WriteHeader(http.StatusCreated)\n}"
-    },
-    {
-      "type": "text",
-      "data": "src/handlers/usersRouter.go"
-    },
-    {
-      "type": "code",
-      "language": "golang",
-      "data": "package handlers\n\nimport (\n\t\"net/http\"\n\t\"strings\"\n\n\t\"gopkg.in/mgo.v2/bson\"\n)\n\n// UsersRouter handles the users route\nfunc UsersRouter(w http.ResponseWriter, r *http.Request) {\n\tpath := strings.TrimSuffix(r.URL.Path, \"/\")\n\n\tif path == \"/users\" {\n\t\tswitch r.Method {\n\t\tcase http.MethodGet:\n\t\t\tusersGetAll(w, r)\n\t\t\treturn\n\t\tcase http.MethodPost:\n\t\t\tusersPostOne(w, r)\n\t\t\treturn\n\t\tdefault:\n\t\t\tpostError(w, http.StatusMethodNotAllowed)\n\t\t\treturn\n\t\t}\n\t}\n\n\tpath = strings.TrimPrefix(path, \"/users/\")\n\tif !bson.IsObjectIdHex(path) {\n\t\tpostError(w, http.StatusNotFound)\n\t\treturn\n\t}\n\n\t// id := bson.ObjectIdHex(path)\n\n\tswitch r.Method {\n\tcase http.MethodGet:\n\t\treturn\n\tcase http.MethodPut:\n\t\treturn\n\tcase http.MethodPatch:\n\t\treturn\n\tcase http.MethodDelete:\n\t\treturn\n\tdefault:\n\t\tpostError(w, http.StatusMethodNotAllowed)\n\t\treturn\n\t}\n}"
-    },
-    {
-      "type": "text",
-      "data": "diff.patch"
-    },
-    {
-      "type": "code",
-      "language": "sh",
-      "data": "diff --git a/src/handlers/userHandlers.go b/src/handlers/userHandlers.go\nindex eb1cf43..a00b840 100644\n--- a/src/handlers/userHandlers.go\n+++ b/src/handlers/userHandlers.go\n@@ -1,11 +1,30 @@\n package handlers\n \n import (\n+\t\"encoding/json\"\n+\t\"errors\"\n+\t\"io/ioutil\"\n \t\"net/http\"\n \n+\t\"gopkg.in/mgo.v2/bson\"\n+\n \t\"github.com/build-restful-apis/src/user\"\n )\n \n+func bodyToUser(r *http.Request, u *user.User) error {\n+\tif r.Body == nil {\n+\t\treturn errors.New(\"Request body is empty\")\n+\t}\n+\tif u == nil {\n+\t\treturn errors.New(\"A user is required\")\n+\t}\n+\tbd, err := ioutil.ReadAll(r.Body)\n+\tif err != nil {\n+\t\treturn err\n+\t}\n+\treturn json.Unmarshal(bd, u)\n+}\n+\n func usersGetAll(w http.ResponseWriter, r *http.Request) {\n \tusers, err := user.All()\n \tif err != nil {\n@@ -14,3 +33,24 @@ func usersGetAll(w http.ResponseWriter, r *http.Request) {\n \t}\n \tpostBodyResponse(w, http.StatusOK, jsonResponse{\"users\": users})\n }\n+\n+func usersPostOne(w http.ResponseWriter, r *http.Request) {\n+\tu := new(user.User)\n+\terr := bodyToUser(r, u)\n+\tif err != nil {\n+\t\tpostError(w, http.StatusBadRequest)\n+\t\treturn\n+\t}\n+\tu.ID = bson.NewObjectId()\n+\terr = u.Save()\n+\tif err != nil {\n+\t\tif err == user.ErrRecordInvalid {\n+\t\t\tpostError(w, http.StatusBadRequest)\n+\t\t} else {\n+\t\t\tpostError(w, http.StatusInternalServerError)\n+\t\t}\n+\t\treturn\n+\t}\n+\tw.Header().Set(\"Location\", \"/users/\"+u.ID.Hex())\n+\tw.WriteHeader(http.StatusCreated)\n+}\ndiff --git a/src/handlers/usersRouter.go b/src/handlers/usersRouter.go\nindex 72b7cdd..744e339 100644\n--- a/src/handlers/usersRouter.go\n+++ b/src/handlers/usersRouter.go\n@@ -17,6 +17,7 @@ func UsersRouter(w http.ResponseWriter, r *http.Request) {\n \t\t\tusersGetAll(w, r)\n \t\t\treturn\n \t\tcase http.MethodPost:\n+\t\t\tusersPostOne(w, r)\n \t\t\treturn\n \t\tdefault:\n \t\t\tpostError(w, http.StatusMethodNotAllowed)\ndiff --git a/src/user.db b/src/user.db\nindex 7724c95..3db2154 100644\nBinary files a/src/user.db and b/src/user.db differ"
+      "data": "func usersPostOne(w http.ResponseWriter, r *http.Request) {\n\tu := new(user.User)\n\terr := bodyToUser(r, u)\n\tif err != nil {\n\t\tpostError(w, http.StatusBadRequest)\n\t\treturn\n\t}\n\tu.ID = bson.NewObjectId()\n\terr = u.Save()\n\tif err != nil {\n\t\tif err == user.ErrRecordInvalid {\n\t\t\tpostError(w, http.StatusBadRequest)\n\t\t} else {\n\t\t\tpostError(w, http.StatusInternalServerError)\n\t\t}\n\t\treturn\n\t}\n\tw.Header().Set(\"Location\", \"/users/\"+u.ID.Hex())\n\tw.WriteHeader(http.StatusCreated)\n}"
     },
     {
       "type": "text",
@@ -298,12 +271,137 @@
     },
     {
       "type": "text",
-      "data": "src/handlers/usersRoute.go"
+      "data": "<h3>Replacing an Item (PUT)</h3>"
+    },
+    {
+      "type": "text",
+      "data": "<b>PUT Request</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Method - PUT</li><li>Target - an item&nbsp;</li><li>Request - full item content&nbsp;</li><li>Result - resource is replaced with the request body&nbsp;</li><li>Responses:&nbsp;</li><ul><li>200 OK + updated resource&nbsp;</li><li>400 bad request&nbsp;</li><li>404 not found&nbsp;</li><li>500 internal server error&nbsp;</li></ul></ul>"
+    },
+    {
+      "type": "text",
+      "data": "src/handlers/userHandlers.go"
     },
     {
       "type": "code",
       "language": "golang",
-      "data": "// UsersRouter handles the users route\nfunc UsersRouter(w http.ResponseWriter, r *http.Request) {\n\tpath := strings.TrimSuffix(r.URL.Path, \"/\")\n\n\tif path == \"/users\" {\n\t\tswitch r.Method {\n\t\tcase http.MethodGet:\n\t\t\tusersGetAll(w, r)\n\t\t\treturn\n\t\tcase http.MethodPost:\n\t\t\tusersPostOne(w, r)\n\t\t\treturn\n\t\tdefault:\n\t\t\tpostError(w, http.StatusMethodNotAllowed)\n\t\t\treturn\n\t\t}\n\t}\n\n\tpath = strings.TrimPrefix(path, \"/users/\")\n\tif !bson.IsObjectIdHex(path) {\n\t\tpostError(w, http.StatusNotFound)\n\t\treturn\n\t}\n\n\tid := bson.ObjectIdHex(path)\n\n\tswitch r.Method {\n\tcase http.MethodGet:\n\t\tusersGetOne(w, r, id)\n\t\treturn\n\tcase http.MethodPut:\n\t\treturn\n\tcase http.MethodPatch:\n\t\treturn\n\tcase http.MethodDelete:\n\t\treturn\n\tdefault:\n\t\tpostError(w, http.StatusMethodNotAllowed)\n\t\treturn\n\t}\n}"
+      "data": "func usersPutOne(w http.ResponseWriter, r *http.Request, id bson.ObjectId) {\n\tu := new(user.User)\n\terr := bodyToUser(r, u)\n\tif err != nil {\n\t\tpostError(w, http.StatusBadRequest)\n\t\treturn\n\t}\n\tu.ID = id\n\terr = u.Save()\n\tif err != nil {\n\t\tif err == user.ErrRecordInvalid {\n\t\t\tpostError(w, http.StatusBadRequest)\n\t\t} else {\n\t\t\tpostError(w, http.StatusInternalServerError)\n\t\t}\n\t\treturn\n\t}\n\tpostBodyResponse(w, http.StatusOK, jsonResponse{\"user\": u})\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h3>Updating an Item (PATCH)</h3>"
+    },
+    {
+      "type": "text",
+      "data": "PATCH Request&nbsp;"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Method - PATCH</li><li>Target - an item&nbsp;</li><li>Request - partial item content&nbsp;</li><li>Result - resource is updated based on fields existing in the request&nbsp;</li><li>Reponses:</li><ul><li>200 OK + updated resource</li><li>400 bad request</li><li>404 not found</li><li>500 internal server error&nbsp;</li></ul></ul>"
+    },
+    {
+      "type": "text",
+      "data": "src/handlers/userHandlers.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "func usersPatchOne(w http.ResponseWriter, r *http.Request, id bson.ObjectId) {\n\tu, err := user.One(id)\n\tif err != nil {\n\t\tif err == storm.ErrNotFound {\n\t\t\tpostError(w, http.StatusNotFound)\n\t\t\treturn\n\t\t}\n\t\tpostError(w, http.StatusInternalServerError)\n\t\treturn\n\t}\n\terr = bodyToUser(r, u)\n\tif err != nil {\n\t\tpostError(w, http.StatusBadRequest)\n\t\treturn\n\t}\n\tu.ID = id\n\terr = u.Save()\n\tif err != nil {\n\t\tif err == user.ErrRecordInvalid {\n\t\t\tpostError(w, http.StatusBadRequest)\n\t\t} else {\n\t\t\tpostError(w, http.StatusInternalServerError)\n\t\t}\n\t\treturn\n\t}\n\tw.Header().Set(\"Location\", \"/users/\"+u.ID.Hex())\n\tw.WriteHeader(http.StatusCreated)\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h3>Removing an Item (DELETE)</h3>"
+    },
+    {
+      "type": "text",
+      "data": "DELETE Request&nbsp;"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Method - DELETE</li><li>Target - an item</li><li>Request - no content&nbsp;</li><li>Result - the resource is removed&nbsp;</li><li>Responses:&nbsp;</li><ul><li>200 OK (sometimes 204 no content)</li><li>404 not found&nbsp;</li><li>500 internal server error&nbsp;</li></ul></ul>"
+    },
+    {
+      "type": "text",
+      "data": "src/handlers/userHandlers/go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "func usersDeleteOne(w http.ResponseWriter, _ *http.Request, id bson.ObjectId) {\n\terr := user.Delete(id)\n\tif err != nil {\n\t\tif err == storm.ErrNotFound {\n\t\t\tpostError(w, http.StatusNotFound)\n\t\t\treturn\n\t\t}\n\t\tpostError(w, http.StatusInternalServerError)\n\t\treturn\n\t}\n\tw.WriteHeader(http.StatusOK)\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h3>Retrieving Headers (HEAD)</h3>"
+    },
+    {
+      "type": "text",
+      "data": "<b>HEAD Request&nbsp;</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Method - HEAD</li><li>Target - any resource</li><li>Request - no content&nbsp;</li><li>Result - no effect on the resource&nbsp;</li><li>Responses:&nbsp;</li><ul><li>200 OK + headers from GET method&nbsp;</li><li>404 not found&nbsp;</li><li>500 internal server error</li></ul></ul>"
+    },
+    {
+      "type": "text",
+      "data": "src/handlers/userHandler.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "func usersGetOne(w http.ResponseWriter, r *http.Request, id bson.ObjectId) {\n  ...\n  if r.Method == http.MethodHead {\n\t\tpostBodyResponse(w, http.StatusOK, jsonResponse{})\n\t\treturn \n\t}\n\tpostBodyResponse(w, http.StatusOK, jsonResponse{\"user\": u})\n}\n\nfunc usersGetAll(w http.ResponseWriter, r *http.Request) {\n\tif r.Method == http.MethodHead {\n\t\tpostBodyResponse(w, http.StatusOK, jsonResponse{})\n\t\treturn \n\t}\n\tpostBodyResponse(w, http.StatusOK, jsonResponse{\"users\": users})\n  ...\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h3>Retrieving Options (OPTIONS)</h3>"
+    },
+    {
+      "type": "text",
+      "data": "<b>OPTIONS Request</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Method - OPTIONS&nbsp;</li><li>Target - any resource&nbsp;</li><li>Request - no content&nbsp;</li><li>Result - no effect on the resource&nbsp;</li><li>Responses:&nbsp;</li><ul><li>200 OK + “Allow” header with list of implemented methods&nbsp;</li><li>Optional response - body with documentation of allowed requests&nbsp;</li></ul></ul>"
+    },
+    {
+      "type": "text",
+      "data": "src/handlers/responses.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "func postOptionsResponse(w http.ResponseWriter, methods []string, content jsonResponse) {\n\tw.Header().Set(\"Allow\", strings.Join(methods, \",\"))\n\tpostBodyResponse(w, http.StatusOK, content)\n}"
+    },
+    {
+      "type": "text",
+      "data": "src/handlers/usersRouter.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "// UsersRouter handles the users route\nfunc UsersRouter(w http.ResponseWriter, r *http.Request) {\n\t  ...\n\t\tcase http.MethodOptions:\n\t\t\tpostOptionsResponse(w, []string{ http.MethodGet, http.MethodPost, http.MethodHead, http.MethodOptions }, nil)\n\t\t\treturn\n\t\tdefault:\n\t\t\tpostError(w, http.StatusMethodNotAllowed)\n\t\t\treturn\n\t\t}\n\t}\n\t...\n\t\n\tcase http.MethodOptions:\n\t\tpostOptionsResponse(w, []string{ http.MethodGet, http.MethodPut, http.MethodPatch, http.MethodDelete, http.MethodHead, http.MethodOptions }, nil)\n\t\treturn\n\tdefault:\n\t\tpostError(w, http.StatusMethodNotAllowed)\n\t\treturn\n\t}\n}\n"
+    },
+    {
+      "type": "text",
+      "data": "<b>Summary&nbsp;</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Outlined the API</li><li>Created the data store&nbsp;</li><li>Added CRUD functionality to a collection&nbsp;</li><li>Created a custom router&nbsp;</li><li>Added individual handlers&nbsp;</li><li>Discussed documentation&nbsp;</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
     },
     {
       "type": "text",

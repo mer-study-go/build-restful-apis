@@ -1,0 +1,247 @@
+{
+  "title": "4 - Testing and Profiling ",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h3>Why Are Tests Important?&nbsp;</h3>"
+    },
+    {
+      "type": "text",
+      "data": "<b>Types of Testing&nbsp;</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>End-to-end tests:</li><ul><li>Test the program as a whole&nbsp;</li><li>Treat the program as a black box</li><li>Good for QA, but late&nbsp;</li></ul><li>Unit test:</li><ul><li>Test smallest elements of code (usually functions)</li><li>Check output and state changes on a granular level&nbsp;</li><li>Useful for early bug fixing and during code maintenance&nbsp;</li></ul></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<b>Which Tests Are Good?</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Meaningful:</li><ul><li>Test actual use cases of the functions&nbsp;</li><li>Test against valid and invalid input&nbsp;</li><li>Examine ouptput and expected state changes&nbsp;</li></ul><li>Comprehensive:</li><ul><li>Explore as many code pathways as possible&nbsp;</li></ul><li>Metric:</li><ul><li>Code coverage - the percentage of code traversed during tests&nbsp;</li><li>Strive for 100%, but only 80-90% is usually attainbale&nbsp;</li></ul></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<b>Unite Tests in Go</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Test code is contained in xxxx_test.go</li><li>Test code is not included in the build&nbsp;</li><li>Test code cannot be sahred between packages&nbsp;</li><li>Implementation:</li></ul>"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "func TestXxxx (t *testing.T) {}"
+    },
+    {
+      "type": "text",
+      "data": "<h3>An Ideal Unit Test&nbsp;</h3>"
+    },
+    {
+      "type": "text",
+      "data": "src/handlers/userHandlers_test.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "package handlers\n\nimport (\n\t\"net/http\"\n\t\"github.com/build-restful-apis/src/user\"\n\t\"testing\"\n\t\"reflect\"\n\t\"io/ioutil\"\n\t\"bytes\"\n\t\"gopkg.in/mgo.v2/bson\"\n\t\"encoding/json\"\n)\n\nfunc TestBodyToUser(t *testing.T) {\n\tvalid := &user.User {\n\t\tID: bson.NewObjectId(),\n\t\tName: \"John\",\n\t\tRole: \"Tester\",\n\t}\n\n\tjs, err := json.Marshal(valid)\n\n\tif err != nil {\n\t\tt.Errorf(\"Error marshalling a valid users: %s\", err)\n\t\tt.FailNow()\n\n\t}\n\n\tts := []struct {\n\t\ttxt string\n\t\tr *http.Request\n\t\tu *user.User\n\t\terr bool\n\t\texp *user.User\n\t} {\n\t\t// request is nil\n\t\t{\n\t\t\ttxt : \"nil request\",\n\t\t\terr: true,\n\t\t},\n\t\t// request is empty\n\t\t{\n\t\t\ttxt: \"empty request body\",\n\t\t\tr: &http.Request{},\n\t\t\terr: true,\n\t\t},\n\t\t// empty user\n\t\t{\n\t\t\ttxt: \"emtpy user\", \n\t\t\tr: &http.Request {\n\t\t\t\tBody: ioutil.NopCloser(bytes.NewBufferString(\"{}\")),\n\t\t\t},\n\t\t\terr: true,\n\t\t},\n\t\t// malformed data\n\t\t{\n\t\t\ttxt: \"malformed data\",\n\t\t\tr: &http.Request {\n\t\t\t\tBody: ioutil.NopCloser(bytes.NewBufferString(`{\"id\":12}`)),\n\t\t\t},\n\t\t\tu: &user.User{},\n\t\t\terr: true,\n\t\t},\n\t\t// valid data \n\t\t{\n\t\t\ttxt: \"valid request\", \n\t\t\tr: &http.Request {\n\t\t\t\tBody: ioutil.NopCloser(bytes.NewBuffer(js)),\n\t\t\t},\n\t\t\tu: &user.User{},\n\t\t\texp: valid,\n\t\t},\n\t}\n\n\tfor _, tc := range ts {\n\t\tt.Log(tc.txt)\n\t\terr := bodyToUser(tc.r, tc.u)\n\t\tif tc.err {\n\t\t\tif err == nil {\n\t\t\t\tt.Error(\"Expected error, got none.\")\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\n\t\tif err != nil {\n\t\t\tt.Errorf(\"Unexpected error: %s\", err)\n\t\t\tcontinue\n\t\t}\n\n\t\tif !reflect.DeepEqual(tc.u, tc.exp) {\n\t\t\tt.Error(\"Unmarsshaled data is different:\")\n\t\t\tt.Error(tc.u)\n\t\t\tt.Error(tc.exp)\n\t\t}\n\t}\n\t\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h3>A Minimum Viable Unit Test</h3>"
+    },
+    {
+      "type": "text",
+      "data": "<b>Simple Tests</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Focus on valid, working code and usage&nbsp;</li><li>Do not cover edge cases&nbsp;</li><li>Better than no tests&nbsp;</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    }
+  ]
+}
