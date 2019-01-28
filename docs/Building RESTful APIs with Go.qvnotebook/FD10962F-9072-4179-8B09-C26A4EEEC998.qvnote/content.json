@@ -1,0 +1,75 @@
+{
+  "title": "1 - RESTful API in Go - Why?",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h3>Useful Tools</h3>"
+    },
+    {
+      "type": "code",
+      "language": "sh",
+      "data": "$ go version"
+    },
+    {
+      "type": "code",
+      "language": "sh",
+      "data": "$ go env"
+    },
+    {
+      "type": "text",
+      "data": "<h3>Why Go?</h3>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Multi-threaded by design&nbsp;</li><li>Self-congtained, portable, and cross-platform&nbsp;</li><li>Strongly typed, compiled&nbsp;</li><li>Excellent native JSON support&nbsp;</li><li>Extensive native testing framework&nbsp;</li><li>Simple and easy to understand</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    }
+  ]
+}

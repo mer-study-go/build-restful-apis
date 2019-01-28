@@ -1,0 +1,142 @@
+{
+  "title": "2 - Your First API Server ",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h3>Building an API Web Server&nbsp;</h3>"
+    },
+    {
+      "type": "text",
+      "data": "src/first-api-server/main.go<br>"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n)\n\nfunc main() {\n\terr := http.ListenAndServe(\"localhost:8080\", nil)\n\tif err != nil {\n\t\tfmt.Println(err)\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h3>Creating the Default Route</h3>"
+    },
+    {
+      "type": "text",
+      "data": "<h3>Creating the Default Hadler</h3>"
+    },
+    {
+      "type": "text",
+      "data": "src/first-api-server/main.go<br>"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"os\"\n)\n\nfunc rootHandler(w http.ResponseWriter, r *http.Request) {\n\tw.WriteHeader(http.StatusOK)\n\tw.Write([]byte(\"Running API v1\\n\"))\n}\n\nfunc main() {\n\thttp.HandleFunc(\"/\", rootHandler)\n\terr := http.ListenAndServe(\"localhost:8080\", nil)\n\tif err != nil {\n\t\tfmt.Println(err)\n\t\tos.Exit(1)\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h3>Custom Error Message</h3>"
+    },
+    {
+      "type": "text",
+      "data": "src/first-api-server/main.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"os\"\n)\n\nfunc rootHandler(w http.ResponseWriter, r *http.Request) {\n\tif r.URL.Path != \"/\" {\n\t\tw.WriteHeader(http.StatusNotFound)\n\t\tw.Write([]byte(\"Asset not found\\n\"))\n\t\treturn\n\t}\n\tw.WriteHeader(http.StatusOK)\n\tw.Write([]byte(\"Running API v1\\n\"))\n}\n\nfunc main() {\n\thttp.HandleFunc(\"/\", rootHandler)\n\terr := http.ListenAndServe(\"localhost:8080\", nil)\n\tif err != nil {\n\t\tfmt.Println(err)\n\t\tos.Exit(1)\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "testcase 1: (Normal)"
+    },
+    {
+      "type": "code",
+      "language": "sh",
+      "data": "$ curl localhost:8080"
+    },
+    {
+      "type": "text",
+      "data": "testcase 2: (Error)"
+    },
+    {
+      "type": "code",
+      "language": "sh",
+      "data": "$ curl localhost:8080/something "
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    }
+  ]
+}

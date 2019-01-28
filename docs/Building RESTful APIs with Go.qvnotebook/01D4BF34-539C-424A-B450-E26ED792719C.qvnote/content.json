@@ -1,0 +1,419 @@
+{
+  "title": "3 - Making Your API RESTful",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h3>Outlining the API</h3>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Resource - a list of users&nbsp;<br></li><li>List item data - name, role, and id&nbsp;</li><li>Functionality - Create, Read, Update, and Delete (CRUD)</li><li>Endpoints:</li><ul><li>Collection: /users</li><li>Item: /users/{id}</li></ul><li>Data format - JSON</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<b>Create an Item</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Method - POST</li><li>Target - collection&nbsp;</li><li>Endpoint - POST/users&nbsp;</li><li>Request content - full item data&nbsp;</li><li>Successful response - 201 created + location&nbsp;</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<b>Access the Collection&nbsp;</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Method - GET&nbsp;</li><li>Target - collection&nbsp;</li><li>Endpoint - GET/users&nbsp;</li><li>Request content - none&nbsp;</li><li>Successful response - 200 OK + list of users&nbsp;</li><li>Missing resource - 404 not found&nbsp;</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<b>Replace an Item</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Method - PUT&nbsp;</li><li>Target - item&nbsp;</li><li>Endpoint - PUT /user/{id}</li><li>Request content - full item data&nbsp;</li><li>Successful response - 200 OK + new item data&nbsp;</li><li>Missing resource - 404 not found&nbsp;</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<b>Update an Item</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Method - PATCH</li><li>Target - item&nbsp;</li><li>Endpoint - PATCH /users/{id}</li><li>Request content - partial item data&nbsp;</li><li>Successful response - 200 OK + new item data&nbsp;</li><li>Missing resource - 404 not found&nbsp;</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<b>Typical Responses</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Malformed reqeusts - 400 bad request&nbsp;</li><li>Execution errors - 500 internal server error&nbsp;</li><li>Invalid method - 405 method not allowed&nbsp;</li><li>Missing resources - 404 not found&nbsp;</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<h3><b>Setting Up a Data Store</b></h3>"
+    },
+    {
+      "type": "text",
+      "data": "<b>Persistent Data Store</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Local key-value store:</li><ul><li>Low traffice volume, little data, and simple data&nbsp;</li></ul><li>Separate DB server:&nbsp;</li><ul><li>Complex data, independently scalable, and busier sites&nbsp;</li></ul><li>Memory cache + DB cluster&nbsp;</li><ul><li>High-end, big data, and high traffic volume&nbsp;</li></ul></ul>"
+    },
+    {
+      "type": "text",
+      "data": "Option 1: storm"
+    },
+    {
+      "type": "code",
+      "language": "sh",
+      "data": "$ go get github.com/asdine/storm "
+    },
+    {
+      "type": "text",
+      "data": "Option 2; bson"
+    },
+    {
+      "type": "code",
+      "language": "sh",
+      "data": "$ go get gopkg.in/mgo.v2/bson"
+    },
+    {
+      "type": "text",
+      "data": "src/user/main.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "package user\n\nimport \"gopkg.in/mgo.v2/bson\"\n\n// User holds data for a single user\ntype User struct {\n\tID   bson.ObjectId `json:\"id\" storm:\"id\"`\n\tName string        `json:\"name\"`\n\tRole string        `json:\"role\"`\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h3>Record Manipulation</h3>"
+    },
+    {
+      "type": "text",
+      "data": "src/user/main.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "package user\n\nimport (\n\t\"errors\"\n\n\t\"github.com/asdine/storm\"\n\t\"gopkg.in/mgo.v2/bson\"\n)\n\n// User holds data for a single user\ntype User struct {\n\tID   bson.ObjectId `json:\"id\" storm:\"id\"`\n\tName string        `json:\"name\"`\n\tRole string        `json:\"role\"`\n}\n\nconst (\n\tdbPath = \"user.db\"\n)\n\n// errors\nvar (\n\tErrRecordInvalid = errors.New(\"record is invalid\")\n)\n\n// All retrieves all users from the database\nfunc All() ([]User, error) {\n\tdb, err := storm.Open(dbPath)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer db.Close()\n\tusers := []User{}\n\terr = db.All(&users)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\treturn users, nil\n}\n\n// One returns a single user record from the database\nfunc One(id bson.ObjectId) (*User, error) {\n\tdb, err := storm.Open(dbPath)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer db.Close()\n\tu := new(User)\n\terr = db.One(\"ID\", id, u)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\treturn u, nil\n}\n\n// Delete removes a given record from the database\nfunc Delete(id bson.ObjectId) error {\n\tdb, err := storm.Open(dbPath)\n\tif err != nil {\n\t\treturn err\n\t}\n\tdefer db.Close()\n\tu := new(User)\n\terr = db.One(\"ID\", id, u)\n\tif err != nil {\n\t\treturn err\n\t}\n\treturn db.DeleteStruct(u)\n}\n\n// Save updates or creates a given record in the database\nfunc (u *User) Save() error {\n\tif err := u.validate(); err != nil {\n\t\treturn err\n\t}\n\tdb, err := storm.Open(dbPath)\n\tif err != nil {\n\t\treturn err\n\t}\n\tdefer db.Close()\n\treturn db.Save(u)\n}\n\n// validate makes sure that the record contains valid data\nfunc (u *User) validate() error {\n\tif u.Name == \"\" {\n\t\treturn ErrRecordInvalid\n\t}\n\treturn nil\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h3>Creating a Custom Handler</h3>"
+    },
+    {
+      "type": "text",
+      "data": "<b>API Resource Requests</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Common route - /users</li><li>Algorithm:</li><ul><li>Recognize the /users route&nbsp;</li><li>Parse the URL and method to call a proper handler&nbsp;</li><li>Retrieve or process data&nbsp;</li><li>Send the response&nbsp;</li></ul></ul>"
+    },
+    {
+      "type": "text",
+      "data": "src/handlers/rootHandler.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "package handlers\n\nimport \"net/http\"\n\n// RootHandler handles the root route\nfunc RootHandler(w http.ResponseWriter, r *http.Request) {\n\tif r.URL.Path != \"/\" {\n\t\tw.WriteHeader(http.StatusNotFound)\n\t\tw.Write([]byte(\"Asset not found\\n\"))\n\t\treturn\n\t}\n\tw.WriteHeader(http.StatusOK)\n\tw.Write([]byte(\"Running API v1\\n\"))\n}"
+    },
+    {
+      "type": "text",
+      "data": "src/handlers/usersRouter.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "package handlers\n\nimport (\n\t\"net/http\"\n\t\"strings\"\n\n\t\"gopkg.in/mgo.v2/bson\"\n)\n\n// UsersRouter handles the users route\nfunc UsersRouter(w http.ResponseWriter, r *http.Request) {\n\tpath := strings.TrimSuffix(r.URL.Path, \"/\")\n\n\tif path == \"/users\" {\n\t\tswitch r.Method {\n\t\tcase http.MethodGet:\n\t\t\treturn\n\t\tcase http.MethodPost:\n\t\t\treturn\n\t\tdefault:\n\t\t\tpostError(w, http.StatusMethodNotAllowed)\n\t\t\treturn\n\t\t}\n\t}\n\n\tpath = strings.TrimPrefix(path, \"/users/\")\n\tif !bson.IsObjectIdHex(path) {\n\t\tpostError(w, http.StatusNotFound)\n\t\treturn\n\t}\n\n\t// id := bson.ObjectIdHex(path)\n\n\tswitch r.Method {\n\tcase http.MethodGet:\n\t\treturn\n\tcase http.MethodPut:\n\t\treturn\n\tcase http.MethodPatch:\n\t\treturn\n\tcase http.MethodDelete:\n\t\treturn\n\tdefault:\n\t\tpostError(w, http.StatusMethodNotAllowed)\n\t\treturn\n\t}\n}\n"
+    },
+    {
+      "type": "text",
+      "data": "src/main.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"os\"\n\n\t\"github.com/build-restful-apis/src/handlers\"\n)\n\nfunc main() {\n\thttp.HandleFunc(\"/users/\", handlers.UsersRouter)\n\thttp.HandleFunc(\"/users\", handlers.UsersRouter)\n\thttp.HandleFunc(\"/\", handlers.RootHandler)\n\terr := http.ListenAndServe(\"localhost:8080\", nil)\n\tif err != nil {\n\t\tfmt.Println(err)\n\t\tos.Exit(1)\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "src/handlers/responses.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "package handlers\n\nimport \"net/http\"\n\nfunc postError(w http.ResponseWriter, code int) {\n\thttp.Error(w, http.StatusText(code), code)\n}"
+    },
+    {
+      "type": "text",
+      "data": "testcase 1:"
+    },
+    {
+      "type": "code",
+      "language": "sh",
+      "data": "$ curl localhost:8080"
+    },
+    {
+      "type": "text",
+      "data": "testcase 2:"
+    },
+    {
+      "type": "code",
+      "language": "sh",
+      "data": "$ curl localhost:8080/users"
+    },
+    {
+      "type": "text",
+      "data": "testcase 3:"
+    },
+    {
+      "type": "code",
+      "language": "sh",
+      "data": "$ curl localhost:8080/users/1"
+    },
+    {
+      "type": "text",
+      "data": "<h3>Retrieving a List (GET)</h3>"
+    },
+    {
+      "type": "text",
+      "data": "<b>GET Request&nbsp;</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Responses:</li><ul><li>200 OK + a list of items in the collection&nbsp;</li><li>404 not found</li><li>500 internal server error&nbsp;</li></ul></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<b>Response Content</b>"
+    },
+    {
+      "type": "text",
+      "data": "A list or an unnamed item&nbsp;"
+    },
+    {
+      "type": "text",
+      "data": "Body:"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "data": "[\n  {\n    \"name\": \"Sandra\",\n    \"role\": \"team leader\"\n  },\n  {\n    \"name\": \"Joe\",\n    \"role\": \"developer\"\n  }\n]"
+    },
+    {
+      "type": "text",
+      "data": "src/handlers/responses.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "package handlers\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n)\n\ntype jsonResponse map[string]interface{}\n\nfunc postError(w http.ResponseWriter, code int) {\n\thttp.Error(w, http.StatusText(code), code)\n}\n\nfunc postBodyResponse(w http.ResponseWriter, code int, content jsonResponse) {\n\tif content != nil {\n\t\tjs, err := json.Marshal(content)\n\t\tif err != nil {\n\t\t\tpostError(w, http.StatusInternalServerError)\n\t\t\treturn\n\t\t}\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\tw.WriteHeader(code)\n\t\tw.Write(js)\n\t\treturn\n\t}\n\tw.WriteHeader(code)\n\tw.Write([]byte(http.StatusText(code)))\n}"
+    },
+    {
+      "type": "text",
+      "data": "src/handlers/useHandlers.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "package handlers\n\nimport (\n\t\"net/http\"\n\n\t\"github.com/build-restful-apis/src/user\"\n)\n\nfunc usersGetAll(w http.ResponseWriter, r *http.Request) {\n\tusers, err := user.All()\n\tif err != nil {\n\t\tpostError(w, http.StatusInternalServerError)\n\t\treturn\n\t}\n\tpostBodyResponse(w, http.StatusOK, jsonResponse{\"users\": users})\n}"
+    },
+    {
+      "type": "text",
+      "data": "src/handlers/usersRouter.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "package handlers\n\nimport (\n\t\"net/http\"\n\t\"strings\"\n\n\t\"gopkg.in/mgo.v2/bson\"\n)\n\n// UsersRouter handles the users route\nfunc UsersRouter(w http.ResponseWriter, r *http.Request) {\n\tpath := strings.TrimSuffix(r.URL.Path, \"/\")\n\n\tif path == \"/users\" {\n\t\tswitch r.Method {\n\t\tcase http.MethodGet:\n\t\t\tusersGetAll(w, r)\n\t\t\treturn\n\t\tcase http.MethodPost:\n\t\t\treturn\n\t\tdefault:\n\t\t\tpostError(w, http.StatusMethodNotAllowed)\n\t\t\treturn\n\t\t}\n\t}\n\n\tpath = strings.TrimPrefix(path, \"/users/\")\n\tif !bson.IsObjectIdHex(path) {\n\t\tpostError(w, http.StatusNotFound)\n\t\treturn\n\t}\n\n\t// id := bson.ObjectIdHex(path)\n\n\tswitch r.Method {\n\tcase http.MethodGet:\n\t\treturn\n\tcase http.MethodPut:\n\t\treturn\n\tcase http.MethodPatch:\n\t\treturn\n\tcase http.MethodDelete:\n\t\treturn\n\tdefault:\n\t\tpostError(w, http.StatusMethodNotAllowed)\n\t\treturn\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h3>Creating an Item (POST)</h3>"
+    },
+    {
+      "type": "text",
+      "data": "<b>POST Request</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Method - POST</li><li>Target - a collection&nbsp;</li><li>Request - full item content&nbsp;</li><li>Result - an item is added to the collection&nbsp;</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<img src=\"quiver-image-url/F09F133631FC1A964CDF51AF129BD497.png\" alt=\"Screen Shot 2019-01-28 at 11.34.36.png\" width=\"833\" height=\"418\"><br>"
+    },
+    {
+      "type": "text",
+      "data": "<b>Update a Record</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>By assignment and duplication:</li><ul><li>recordItem, err = Update(data, recordItem) (*recordItem, error)</li></ul><li>By reference:</li><ul><li>err = Update(data, *recordItem) error&nbsp;</li></ul></ul>"
+    },
+    {
+      "type": "text",
+      "data": "src/handlers/userHandlers.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "package handlers\n\nimport (\n\t\"encoding/json\"\n\t\"errors\"\n\t\"io/ioutil\"\n\t\"net/http\"\n\n\t\"gopkg.in/mgo.v2/bson\"\n\n\t\"github.com/build-restful-apis/src/user\"\n)\n\nfunc bodyToUser(r *http.Request, u *user.User) error {\n\tif r.Body == nil {\n\t\treturn errors.New(\"Request body is empty\")\n\t}\n\tif u == nil {\n\t\treturn errors.New(\"A user is required\")\n\t}\n\tbd, err := ioutil.ReadAll(r.Body)\n\tif err != nil {\n\t\treturn err\n\t}\n\treturn json.Unmarshal(bd, u)\n}\n\nfunc usersGetAll(w http.ResponseWriter, r *http.Request) {\n\tusers, err := user.All()\n\tif err != nil {\n\t\tpostError(w, http.StatusInternalServerError)\n\t\treturn\n\t}\n\tpostBodyResponse(w, http.StatusOK, jsonResponse{\"users\": users})\n}\n\nfunc usersPostOne(w http.ResponseWriter, r *http.Request) {\n\tu := new(user.User)\n\terr := bodyToUser(r, u)\n\tif err != nil {\n\t\tpostError(w, http.StatusBadRequest)\n\t\treturn\n\t}\n\tu.ID = bson.NewObjectId()\n\terr = u.Save()\n\tif err != nil {\n\t\tif err == user.ErrRecordInvalid {\n\t\t\tpostError(w, http.StatusBadRequest)\n\t\t} else {\n\t\t\tpostError(w, http.StatusInternalServerError)\n\t\t}\n\t\treturn\n\t}\n\tw.Header().Set(\"Location\", \"/users/\"+u.ID.Hex())\n\tw.WriteHeader(http.StatusCreated)\n}"
+    },
+    {
+      "type": "text",
+      "data": "src/handlers/usersRouter.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "package handlers\n\nimport (\n\t\"net/http\"\n\t\"strings\"\n\n\t\"gopkg.in/mgo.v2/bson\"\n)\n\n// UsersRouter handles the users route\nfunc UsersRouter(w http.ResponseWriter, r *http.Request) {\n\tpath := strings.TrimSuffix(r.URL.Path, \"/\")\n\n\tif path == \"/users\" {\n\t\tswitch r.Method {\n\t\tcase http.MethodGet:\n\t\t\tusersGetAll(w, r)\n\t\t\treturn\n\t\tcase http.MethodPost:\n\t\t\tusersPostOne(w, r)\n\t\t\treturn\n\t\tdefault:\n\t\t\tpostError(w, http.StatusMethodNotAllowed)\n\t\t\treturn\n\t\t}\n\t}\n\n\tpath = strings.TrimPrefix(path, \"/users/\")\n\tif !bson.IsObjectIdHex(path) {\n\t\tpostError(w, http.StatusNotFound)\n\t\treturn\n\t}\n\n\t// id := bson.ObjectIdHex(path)\n\n\tswitch r.Method {\n\tcase http.MethodGet:\n\t\treturn\n\tcase http.MethodPut:\n\t\treturn\n\tcase http.MethodPatch:\n\t\treturn\n\tcase http.MethodDelete:\n\t\treturn\n\tdefault:\n\t\tpostError(w, http.StatusMethodNotAllowed)\n\t\treturn\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "diff.patch"
+    },
+    {
+      "type": "code",
+      "language": "sh",
+      "data": "diff --git a/src/handlers/userHandlers.go b/src/handlers/userHandlers.go\nindex eb1cf43..a00b840 100644\n--- a/src/handlers/userHandlers.go\n+++ b/src/handlers/userHandlers.go\n@@ -1,11 +1,30 @@\n package handlers\n \n import (\n+\t\"encoding/json\"\n+\t\"errors\"\n+\t\"io/ioutil\"\n \t\"net/http\"\n \n+\t\"gopkg.in/mgo.v2/bson\"\n+\n \t\"github.com/build-restful-apis/src/user\"\n )\n \n+func bodyToUser(r *http.Request, u *user.User) error {\n+\tif r.Body == nil {\n+\t\treturn errors.New(\"Request body is empty\")\n+\t}\n+\tif u == nil {\n+\t\treturn errors.New(\"A user is required\")\n+\t}\n+\tbd, err := ioutil.ReadAll(r.Body)\n+\tif err != nil {\n+\t\treturn err\n+\t}\n+\treturn json.Unmarshal(bd, u)\n+}\n+\n func usersGetAll(w http.ResponseWriter, r *http.Request) {\n \tusers, err := user.All()\n \tif err != nil {\n@@ -14,3 +33,24 @@ func usersGetAll(w http.ResponseWriter, r *http.Request) {\n \t}\n \tpostBodyResponse(w, http.StatusOK, jsonResponse{\"users\": users})\n }\n+\n+func usersPostOne(w http.ResponseWriter, r *http.Request) {\n+\tu := new(user.User)\n+\terr := bodyToUser(r, u)\n+\tif err != nil {\n+\t\tpostError(w, http.StatusBadRequest)\n+\t\treturn\n+\t}\n+\tu.ID = bson.NewObjectId()\n+\terr = u.Save()\n+\tif err != nil {\n+\t\tif err == user.ErrRecordInvalid {\n+\t\t\tpostError(w, http.StatusBadRequest)\n+\t\t} else {\n+\t\t\tpostError(w, http.StatusInternalServerError)\n+\t\t}\n+\t\treturn\n+\t}\n+\tw.Header().Set(\"Location\", \"/users/\"+u.ID.Hex())\n+\tw.WriteHeader(http.StatusCreated)\n+}\ndiff --git a/src/handlers/usersRouter.go b/src/handlers/usersRouter.go\nindex 72b7cdd..744e339 100644\n--- a/src/handlers/usersRouter.go\n+++ b/src/handlers/usersRouter.go\n@@ -17,6 +17,7 @@ func UsersRouter(w http.ResponseWriter, r *http.Request) {\n \t\t\tusersGetAll(w, r)\n \t\t\treturn\n \t\tcase http.MethodPost:\n+\t\t\tusersPostOne(w, r)\n \t\t\treturn\n \t\tdefault:\n \t\t\tpostError(w, http.StatusMethodNotAllowed)\ndiff --git a/src/user.db b/src/user.db\nindex 7724c95..3db2154 100644\nBinary files a/src/user.db and b/src/user.db differ"
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    }
+  ]
+}
