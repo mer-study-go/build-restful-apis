@@ -1,0 +1,167 @@
+{
+  "title": "5 - Frameowrks and Middleware",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h3><b>Echo Framework</b></h3>"
+    },
+    {
+      "type": "text",
+      "data": "<b>Frameworks Pros and Cons&nbsp;</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Reasons&nbsp;</li><ul><li>Limited development resources&nbsp;</li><li>Limited pool of ideas&nbsp;</li></ul><li>Cons:</li><ul><li>Unknown code quality&nbsp;</li><li>Licensing cna be a hassle</li></ul><li>Pros:</li><ul><li>Larger feature set and expertise&nbsp;</li><li>Easier to get support, fixes, and ne developers&nbsp;</li></ul></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<b>Golang Web Frameworks</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Gorilla - large and not very performant&nbsp;<br></li><li>httprouter - a very fast router&nbsp;</li><li>Gin - quick and extensible&nbsp;</li><li>Echo - light and the quickest out there&nbsp;</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<h3><b>First Steps in Echo</b></h3>"
+    },
+    {
+      "type": "code",
+      "language": "sh",
+      "data": "$ go get github.com/labstack/echo/..."
+    },
+    {
+      "type": "text",
+      "data": "src/echo/main.go"
+    },
+    {
+      "type": "code",
+      "language": "golang",
+      "data": "package main\n\nimport (\n\t\"net/http\"\n\n\t\"github.com/labstack/echo\"\n)\n\nfunc root(c echo.Context) error {\n\treturn c.String(http.StatusOK, \"Running API v1\")\n}\n\nfunc main() {\n\te := echo.New()\n\n\te.GET(\"/\", root)\n\n\te.Start(\":8080\")\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h3>Recreating Our API in Echo</h3>"
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": "<h3>Middleware</h3>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Middleware is a piece of functionality between the request and the response&nbsp;</li><li>A sample middleware chain:</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<img src=\"quiver-image-url/1F11426BE907EF73A665440080B1C751.png\" alt=\"Screen Shot 2019-01-30 at 15.29.05.png\" width=\"1321\" height=\"326\">"
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    }
+  ]
+}

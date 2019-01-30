@@ -61,6 +61,34 @@
     },
     {
       "type": "text",
+      "data": "<h3>Benchmarking</h3>"
+    },
+    {
+      "type": "text",
+      "data": "<b>Benchmarks in Go</b>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Benchmarks are specialized tests&nbsp;</li><li>Benchmarks focus on performance</li><li>Run on demand</li><li>Implementation:</li><ul><li>func BenchmarkXxxx (b *testing.B) {}</li><li>Loop -for i := 0; i &lt; b.N; i++ { //code }</li><li>Run -go test -bench</li><li>TestMain is also executed</li></ul></ul>"
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
       "data": ""
     },
     {
